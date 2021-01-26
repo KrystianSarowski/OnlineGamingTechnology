@@ -24,6 +24,5 @@ int main()
 	Game game;
 	game.run();
 
-	system("Pause");
 	return 0;
 }

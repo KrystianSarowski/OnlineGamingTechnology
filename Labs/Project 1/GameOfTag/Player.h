@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "VectorMath.h"
 
 class Player
 {
@@ -12,7 +13,6 @@ public:
 	sf::Vector2f getStartPosition();
 	std::string	getName();
 
-	void update(sf::Time t_dt);
 	void setColour(sf::Color t_colour);
 	void setName(std::string t_newName);
 	void setStartPosition(sf::Vector2f t_position);

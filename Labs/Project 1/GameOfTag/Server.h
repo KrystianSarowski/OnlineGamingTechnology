@@ -37,9 +37,6 @@ public:
 	bool getint32t(std::shared_ptr<Connection> t_connection, std::int32_t& t_int32t);
 	bool getPacketType(std::shared_ptr<Connection> t_connection, PacketType& t_packetType);
 
-	void sendString(std::shared_ptr<Connection> t_connection, const std::string& t_string);
-	bool getString(std::shared_ptr<Connection> t_connection, std::string& t_string);
-
 	void sendPlayerUpdate(PlayerData& t_updateData);
 	bool getPlayerUpdate(std::shared_ptr<Connection> t_connection, PlayerData& t_updateData);
 

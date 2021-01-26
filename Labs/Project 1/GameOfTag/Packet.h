@@ -9,7 +9,7 @@
 struct PlayerData
 {
 	int m_playerIndex;
-	sf::Vector2f m_position;
+	sf::Vector2f m_velocity;
 };
 
 struct StartData

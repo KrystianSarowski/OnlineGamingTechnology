@@ -2,7 +2,6 @@
 
 enum class PacketType
 {
-	MESSAGE,
 	PLAYERSET,
 	STATECHANGE,
 	PLAYERUPDATE,
@@ -13,6 +12,7 @@ enum class PacketType
 enum class GameState
 {
 	SELECT,
+	SELECTIP,
 	WAITING,
 	START,
 	GAMEPLAY,

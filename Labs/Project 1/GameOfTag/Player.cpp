@@ -23,21 +23,23 @@ sf::Vector2f Player::move()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		moveVector = sf::Vector2f(0.0f, -1.0f);
+		moveVector += sf::Vector2f(0.0f, -1.0f);
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		moveVector = sf::Vector2f(0.0f, 1.0f);
+		moveVector += sf::Vector2f(0.0f, 1.0f);
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		moveVector = sf::Vector2f(-1.0f, 0.0f);
+		moveVector += sf::Vector2f(-1.0f, 0.0f);
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		moveVector = sf::Vector2f(1.0f, 0.0f);
+		moveVector += sf::Vector2f(1.0f, 0.0f);
 	}
+
+	moveVector = VectorMath::unit(moveVector);
 
 	return moveVector;
 }
@@ -50,10 +52,6 @@ sf::Vector2f Player::getStartPosition()
 std::string Player::getName()
 {
 	return m_name;
-}
-
-void Player::update(sf::Time t_dt)
-{
 }
 
 void Player::setColour(sf::Color t_colour)

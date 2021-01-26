@@ -6,17 +6,6 @@
 
 namespace PS
 {
-	class ChatMessage
-	{
-	public:
-		ChatMessage(const std::string& t_string);
-		std::shared_ptr<Packet> toPacket();
-
-	private:
-
-		std::string m_message;
-	};
-
 	class ChangeState
 	{
 	public:

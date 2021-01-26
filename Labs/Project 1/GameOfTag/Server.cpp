@@ -63,9 +63,10 @@ Server::~Server()
 
 bool Server::listenForNewConnection()
 {
+	//Check if we have two connections if yes we will not bind an incoming connection.
 	if (m_activeConnectionsCount == 2)
 	{
-		return true;
+		return false;
 	}
 
 	int addrlen = sizeof(m_addr);
@@ -80,6 +81,7 @@ bool Server::listenForNewConnection()
 	{
 		std::lock_guard<std::shared_mutex> lock(m_mutexConnectionManager);
 		std::shared_ptr<Connection> newConnection(std::make_shared<Connection>(newConnectionSocket));
+
 		m_connections.push_back(newConnection);
 
 		newConnection->m_id = m_idCounter;
@@ -99,33 +101,6 @@ bool Server::processPacket(std::shared_ptr<Connection> t_connection, PacketType 
 {
 	switch (t_packetType)
 	{
-	case PacketType::MESSAGE:
-	{
-		std::string message;
-		if (!getString(t_connection, message))
-		{
-			return false;
-		}
-
-		PS::ChatMessage chatMessage(message);
-		std::shared_ptr<Packet> msgPacket = std::make_shared<Packet>(chatMessage.toPacket()); //use shared_ptr instead of sending with SendString so we don't have to reallocate packet for each connection
-		{
-			std::shared_lock<std::shared_mutex> lock(m_mutexConnectionManager);
-
-			for (auto connection : m_connections) //For each connection...
-			{
-				if (connection == t_connection)
-				{
-					continue;
-				}
-
-				connection->m_packetManager.append(msgPacket);
-			}
-		}
-
-		std::cout << "Processed chat message packet from user ID: " << t_connection->m_id << std::endl;
-		break;
-	}
 	case PacketType::PLAYERSET:
 	{
 		StartData data;
@@ -187,8 +162,6 @@ void Server::packetSenderThread(Server& t_server)
 			break;
 		}
 
-		std::shared_lock<std::shared_mutex> lock(t_server.m_mutexConnectionManager);
-
 		for (auto connection : t_server.m_connections)
 		{
 			if (connection->m_packetManager.hasPendingPackets())
@@ -218,6 +191,8 @@ void Server::disconnectClient(std::shared_ptr<Connection> t_connection)
 	std::cout << "Total connections: " << m_connections.size() << std::endl;
 
 	m_activeConnectionsCount -= 1;
+
+	m_game->changeState(GameState::WAITING);
 }
 
 bool Server::sendAll(std::shared_ptr<Connection> t_connection, const char* t_data, int t_totalBytes)
@@ -280,30 +255,6 @@ bool Server::getPacketType(std::shared_ptr<Connection> t_connection, PacketType&
 
 	t_packetType = (PacketType)packetTypeInt;
 	return true;
-}
-
-void Server::sendString(std::shared_ptr<Connection> t_connection, const std::string& t_string)
-{
-	PS::ChatMessage message(t_string);
-	t_connection->m_packetManager.append(message.toPacket());
-}
-
-bool Server::getString(std::shared_ptr<Connection> t_connection, std::string& t_string)
-{
-	std::int32_t bufferlength;
-
-	if (!getint32t(t_connection, bufferlength))
-	{
-		return false;
-	}
-
-	if (bufferlength == 0)
-	{
-		return true;
-	}
-
-	t_string.resize(bufferlength);
-	return recieveAll(t_connection, &t_string[0], bufferlength);
 }
 
 void Server::sendPlayerUpdate(PlayerData& t_updateData)

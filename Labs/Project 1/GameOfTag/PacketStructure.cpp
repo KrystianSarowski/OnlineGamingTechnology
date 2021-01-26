@@ -1,19 +1,5 @@
 #include "PacketStructure.h"
 
-PS::ChatMessage::ChatMessage(const std::string& t_string) :
-	m_message(t_string)
-{
-}
-
-std::shared_ptr<Packet> PS::ChatMessage::toPacket()
-{
-	std::shared_ptr<Packet> packet = std::make_shared<Packet>();
-	packet->append(PacketType::MESSAGE);
-	packet->append(m_message.size());
-	packet->append(m_message);
-	return packet;
-}
-
 PS::PlayerUpdate::PlayerUpdate(const PlayerData& t_updateData) :
 	m_data(t_updateData)
 {

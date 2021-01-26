@@ -74,16 +74,6 @@ bool Client::processPacketType(const PacketType t_packetType)
 {
 	switch (t_packetType)
 	{
-	case PacketType::MESSAGE:
-	{
-		std::string message;
-		if (!getString(message))
-		{
-			return false;
-		}
-		std::cout << message << std::endl;
-		break;
-	}
 	case PacketType::PLAYERSET:
 	{
 		StartData data;
@@ -264,39 +254,6 @@ bool Client::sendAll(const char* t_data, int t_totalBytes)
 	return true;
 }
 
-bool Client::getString(std::string& t_string)
-{
-	int32_t bufferlength;
-	if (!getInt32t(bufferlength))
-	{
-		return false;
-	}
-
-	if (bufferlength == 0)
-	{
-		return true;
-	}
-
-	t_string.resize(bufferlength);
-	return recieveAll(&t_string[0], bufferlength);
-}
-
-bool Client::getPlayerUpdate(PlayerData& t_updateData)
-{
-	int32_t bufferlength;
-	if (!getInt32t(bufferlength))
-	{
-		return false;
-	}
-
-	if (bufferlength == 0)
-	{
-		return true;
-	}
-
-	return recieveAll((char*)&t_updateData, bufferlength);;
-}
-
 bool Client::getGameStart(StartData& t_startData)
 {
 	int32_t bufferlength;
@@ -359,12 +316,6 @@ bool Client::getUpdateGame(std::array<sf::Vector2f, 3>& t_positions)
 	}
 
 	return recieveAll((char*)&t_positions[0], bufferlength);;
-}
-
-void Client::sendString(const std::string& t_string)
-{
-	PS::ChatMessage chatMessage(t_string);
-	m_packetManager.append(chatMessage.toPacket());
 }
 
 void Client::sendPlayerUpdate(const PlayerData& t_updateData)

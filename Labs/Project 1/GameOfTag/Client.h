@@ -16,7 +16,6 @@ public:
 	~Client();
 
 	bool connectSocket();
-	void sendString(const std::string& t_string);
 	void sendPlayerUpdate(const PlayerData& t_updateData);
 	void sendGameStart(const StartData& t_startData);
 
@@ -39,8 +38,6 @@ private:
 	bool recieveAll(char* t_data, int t_totalBytes);
 	bool getInt32t(std::int32_t& t_int32t);
 	bool getPacketType(PacketType& t_packetType);
-	bool getString(std::string& t_string);
-	bool getPlayerUpdate(PlayerData& t_updateData);
 	bool getGameStart(StartData& t_startData);
 	bool getGameEnd(EndData& t_endData);
 	bool getChangeState(GameState& t_changeState);
