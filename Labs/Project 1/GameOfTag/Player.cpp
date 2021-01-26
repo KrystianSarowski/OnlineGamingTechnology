@@ -88,24 +88,24 @@ void Player::render(sf::RenderWindow& t_window)
 
 void Player::checkBoundry()
 {
-	if (m_position.x - s_radius < 0)
+	if (m_position.x + s_radius < 0)
 	{
-		m_position.x = s_radius;
+		m_position.x = 500 + s_radius;
 	}
 
-	else if (m_position.x + s_radius > 500)
+	else if (m_position.x - s_radius > 500)
 	{
-		m_position.x = 500 - s_radius;
+		m_position.x = 0 - s_radius;
 	}
 
-	if (m_position.y - s_radius < 0)
+	if (m_position.y + s_radius < 0)
 	{
-		m_position.y = s_radius;
+		m_position.y = 500 + s_radius;
 	}
 
-	else if (m_position.y + s_radius > 500)
+	else if (m_position.y - s_radius > 500)
 	{
-		m_position.y = 500 - s_radius;
+		m_position.y = 0 - s_radius;
 	}
 
 	m_body.setPosition(m_position);

@@ -397,6 +397,9 @@ void Game::render()
 		m_window.draw(m_endText);
 		m_window.draw(m_timeLastedText);
 		break;
+	case GameState::SERVERCLOSED:
+		m_window.draw(m_serverClosedText);
+		break;
 	default:
 		break;
 	}
@@ -483,6 +486,12 @@ void Game::setupUI()
 	m_waitText.setCharacterSize(30);
 	m_waitText.setOrigin(sf::Vector2f(m_waitText.getLocalBounds().width / 2, m_waitText.getLocalBounds().height / 2));
 	m_waitText.setPosition(sf::Vector2f(250.0f, 125.0f));
+
+	m_serverClosedText.setString("Server has shut down...");
+	m_serverClosedText.setFont(m_font);
+	m_serverClosedText.setCharacterSize(30);
+	m_serverClosedText.setOrigin(sf::Vector2f(m_serverClosedText.getLocalBounds().width / 2, m_serverClosedText.getLocalBounds().height / 2));
+	m_serverClosedText.setPosition(sf::Vector2f(250.0f, 125.0f));
 
 	m_ipHelpText.setString("Enter the ip of the host:");
 	m_ipHelpText.setFont(m_font);

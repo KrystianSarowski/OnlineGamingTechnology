@@ -16,5 +16,6 @@ enum class GameState
 	WAITING,
 	START,
 	GAMEPLAY,
-	GAMEOVER
+	GAMEOVER,
+	SERVERCLOSED
 };

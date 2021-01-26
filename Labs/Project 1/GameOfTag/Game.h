@@ -92,6 +92,7 @@ private:
 
 	sf::Text m_gameStartText;
 	sf::Text m_gameOverText;
+	sf::Text m_serverClosedText;
 	sf::Text m_timeLastedText;
 
 	sf::Text m_ipHelpText;

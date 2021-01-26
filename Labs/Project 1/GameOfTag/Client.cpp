@@ -159,6 +159,8 @@ void Client::clientThread(Client& t_client)
 	{
 		std::cout << "Socket was not able to be closed." << std::endl;
 	}
+
+	t_client.m_game->changeState(GameState::SERVERCLOSED);
 }
 
 void Client::packetSenderThread(Client& t_client)
