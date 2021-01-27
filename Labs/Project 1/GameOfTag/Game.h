@@ -39,7 +39,7 @@ private:
 	void render();
 
 	//Server Functions.
-	void startServer();
+	void startServer(bool t_broadcastPublicaly);
 	void listenForConnections();
 
 	//Client Functions.
@@ -81,6 +81,8 @@ private:
 	sf::RectangleShape m_hostButton;
 	sf::RectangleShape m_clientButton;
 	sf::RectangleShape m_ipConfirmButton;
+	sf::RectangleShape m_broadcastYesButton;
+	sf::RectangleShape m_broadcastNoButton;
 
 	sf::Text m_hostText;
 	sf::Text m_clientText;
@@ -97,6 +99,10 @@ private:
 
 	sf::Text m_ipHelpText;
 	sf::Text m_ipValueText;
+
+	sf::Text m_broadcastPubliclyText;
+	sf::Text m_broadcastYesText;
+	sf::Text m_broadcastNoText;
 
 	sf::Font m_font;
 };

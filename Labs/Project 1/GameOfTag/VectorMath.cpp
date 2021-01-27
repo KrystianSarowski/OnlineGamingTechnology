@@ -22,3 +22,11 @@ sf::Vector2f VectorMath::unit(sf::Vector2f t_vect)
 
     return t_vect;
 }
+
+sf::Vector2f VectorMath::applyScaler(sf::Vector2f t_vect, float t_scaler)
+{
+    t_vect.x = t_vect.x * t_scaler;
+    t_vect.y = t_vect.y * t_scaler;
+
+    return t_vect;
+}

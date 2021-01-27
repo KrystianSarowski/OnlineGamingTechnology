@@ -1,7 +1,7 @@
 #include "Game.h"
 
 Game::Game() :
-	m_window{ sf::VideoMode{ 500, 500, 32 }, "Project 1" },
+	m_window{ sf::VideoMode{ 600, 600, 32 }, "Project 1" },
 	m_state(GameState::SELECT)
 {
 	m_player[0].setColour(sf::Color::Blue);
@@ -10,11 +10,11 @@ Game::Game() :
 
 	m_player[1].setColour(sf::Color::Red);
 	m_player[1].setName("Red");
-	m_player[1].setStartPosition(sf::Vector2f(450.0f, 200.0f));
+	m_player[1].setStartPosition(sf::Vector2f(550.0f, 200.0f));
 
 	m_player[2].setColour(sf::Color::Yellow);
 	m_player[2].setName("Yellow");
-	m_player[2].setStartPosition(sf::Vector2f(200.0f, 450.0f));
+	m_player[2].setStartPosition(sf::Vector2f(200.0f, 550.0f));
 
 	m_ipInputString = "127.0.0.1";
 
@@ -95,7 +95,7 @@ void Game::setEndData(EndData t_data)
 	if (t_data.m_playerIndex == m_playerIndex)
 	{
 		m_endText.setString("You caught " + m_player[t_data.m_targetIndex].getName());
-		m_timeLastedText.setString(m_player[t_data.m_targetIndex].getName() + " " + timeString + "s");
+		m_timeLastedText.setString(m_player[t_data.m_targetIndex].getName() + " lasted " + timeString + "s");
 	}
 	else if(t_data.m_targetIndex == m_playerIndex)
 	{
@@ -105,7 +105,7 @@ void Game::setEndData(EndData t_data)
 	else
 	{ 
 		m_endText.setString(m_player[t_data.m_playerIndex].getName() + " has caught " + m_player[t_data.m_targetIndex].getName());
-		m_timeLastedText.setString(m_player[t_data.m_targetIndex].getName() + " " + timeString + "s");
+		m_timeLastedText.setString(m_player[t_data.m_targetIndex].getName() + " lasted " + timeString + "s");
 	}
 
 	m_centreText = true;
@@ -174,10 +174,13 @@ void Game::updateGameplay(sf::Time t_dt)
 	}
 	else
 	{
-		PlayerData data;
-		data.m_playerIndex = m_playerIndex;
-		data.m_velocity = moveVector;
-		m_client->sendPlayerUpdate(data);
+		if (VectorMath::magnitude(moveVector) != 0)
+		{
+			PlayerData data;
+			data.m_playerIndex = m_playerIndex;
+			data.m_velocity = moveVector;
+			m_client->sendPlayerUpdate(data);
+		}
 	}
 }
 
@@ -285,16 +288,16 @@ void Game::processEvents()
 	{
 		sf::Vector2f m_pos = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window));
 
-		if (m_state == GameState::SELECT)
+		switch (m_state)
 		{
+		case GameState::SELECT:
 			if (event.type == sf::Event::MouseButtonPressed)
 			{
 				if (event.key.code == sf::Mouse::Left)
 				{
 					if (m_hostButton.getGlobalBounds().contains(m_pos))
 					{
-						startServer();
-						m_state = GameState::WAITING;
+						m_state = GameState::SELECTBROADCAST;
 					}
 					else if (m_clientButton.getGlobalBounds().contains(m_pos))
 					{
@@ -302,9 +305,8 @@ void Game::processEvents()
 					}
 				}
 			}
-		}
-		else if (m_state == GameState::SELECTIP)
-		{
+			break;
+		case GameState::SELECTIP:
 			processSelectIP(event);
 
 			if (event.type == sf::Event::MouseButtonPressed)
@@ -318,6 +320,27 @@ void Game::processEvents()
 					}
 				}
 			}
+			break;
+		case GameState::SELECTBROADCAST:
+			if (event.type == sf::Event::MouseButtonPressed)
+			{
+				if (event.key.code == sf::Mouse::Left)
+				{
+					if (m_broadcastYesButton.getGlobalBounds().contains(m_pos))
+					{
+						startServer(true);
+						m_state = GameState::WAITING;
+					}
+					else if (m_broadcastNoButton.getGlobalBounds().contains(m_pos))
+					{
+						startServer(false);
+						m_state = GameState::WAITING;
+					}
+				}
+			}
+			break;
+		default:
+			break;
 		}
 
 		if (event.type == sf::Event::KeyPressed)
@@ -371,6 +394,13 @@ void Game::render()
 		m_window.draw(m_ipConfirmButton);
 		m_window.draw(m_ipConfirmText);
 		break;
+	case GameState::SELECTBROADCAST:
+		m_window.draw(m_broadcastYesButton);
+		m_window.draw(m_broadcastNoButton);
+		m_window.draw(m_broadcastYesText);
+		m_window.draw(m_broadcastNoText);
+		m_window.draw(m_broadcastPubliclyText);
+		break;
 	case GameState::WAITING:
 		m_window.draw(m_waitText);
 		break;
@@ -407,10 +437,10 @@ void Game::render()
 	m_window.display();
 }
 
-void Game::startServer()
+void Game::startServer(bool t_broadcastPublicaly)
 {
 	m_host = true;
-	m_server = new Server(8000, false);
+	m_server = new Server(8000, t_broadcastPublicaly);
 	m_server->m_game = this;
 
 	std::thread serverThread(&Game::listenForConnections, this);
@@ -437,19 +467,31 @@ void Game::setupUI()
 	m_hostButton.setOrigin(sf::Vector2f(75.0f, 25.0f));
 	m_hostButton.setOutlineThickness(5.0f);
 	m_hostButton.setFillColor(sf::Color(168, 142, 81));
-	m_hostButton.setPosition(sf::Vector2f(125.0f, 250.0f));
+	m_hostButton.setPosition(sf::Vector2f(150.0f, 300.0f));
 
 	m_clientButton.setSize(sf::Vector2f(150.0f, 50.0f));
 	m_clientButton.setOrigin(sf::Vector2f(75.0f, 25.0f));
 	m_clientButton.setOutlineThickness(5.0f);
 	m_clientButton.setFillColor(sf::Color(168, 142, 81));
-	m_clientButton.setPosition(sf::Vector2f(375.0f, 250.0f));
+	m_clientButton.setPosition(sf::Vector2f(450.0f, 300.0f));
 
 	m_ipConfirmButton.setSize(sf::Vector2f(150.0f, 50.0f));
 	m_ipConfirmButton.setOrigin(sf::Vector2f(75.0f, 25.0f));
 	m_ipConfirmButton.setOutlineThickness(5.0f);
 	m_ipConfirmButton.setFillColor(sf::Color(168, 142, 81));
-	m_ipConfirmButton.setPosition(sf::Vector2f(250.0f, 400.0f));
+	m_ipConfirmButton.setPosition(sf::Vector2f(300.0f, 400.0f));
+
+	m_broadcastNoButton.setSize(sf::Vector2f(150.0f, 50.0f));
+	m_broadcastNoButton.setOrigin(sf::Vector2f(75.0f, 25.0f));
+	m_broadcastNoButton.setOutlineThickness(5.0f);
+	m_broadcastNoButton.setFillColor(sf::Color(168, 142, 81));
+	m_broadcastNoButton.setPosition(sf::Vector2f(450.0f, 300.0f));
+	
+	m_broadcastYesButton.setSize(sf::Vector2f(150.0f, 50.0f));
+	m_broadcastYesButton.setOrigin(sf::Vector2f(75.0f, 25.0f));
+	m_broadcastYesButton.setOutlineThickness(5.0f);
+	m_broadcastYesButton.setFillColor(sf::Color(168, 142, 81));
+	m_broadcastYesButton.setPosition(sf::Vector2f(150.0f, 300.0f));
 
 	m_hostText.setString("Host");
 	m_hostText.setFont(m_font);
@@ -463,47 +505,65 @@ void Game::setupUI()
 	m_clientText.setOrigin(sf::Vector2f(m_clientText.getLocalBounds().width / 2, m_clientText.getLocalBounds().height / 1.3f));
 	m_clientText.setPosition(m_clientButton.getPosition());
 
+	m_broadcastNoText.setString("No");
+	m_broadcastNoText.setFont(m_font);
+	m_broadcastNoText.setCharacterSize(30);
+	m_broadcastNoText.setOrigin(sf::Vector2f(m_broadcastNoText.getLocalBounds().width / 2, m_broadcastNoText.getLocalBounds().height / 1.3f));
+	m_broadcastNoText.setPosition(m_broadcastNoButton.getPosition());
+
+	m_broadcastYesText.setString("Yes");
+	m_broadcastYesText.setFont(m_font);
+	m_broadcastYesText.setCharacterSize(30);
+	m_broadcastYesText.setOrigin(sf::Vector2f(m_broadcastYesText.getLocalBounds().width / 2, m_broadcastYesText.getLocalBounds().height / 1.3f));
+	m_broadcastYesText.setPosition(m_broadcastYesButton.getPosition());
+
 	m_ipConfirmText.setString("Confirm");
 	m_ipConfirmText.setFont(m_font);
 	m_ipConfirmText.setCharacterSize(30);
 	m_ipConfirmText.setOrigin(sf::Vector2f(m_ipConfirmText.getLocalBounds().width / 2, m_ipConfirmText.getLocalBounds().height / 1.3f));
 	m_ipConfirmText.setPosition(m_ipConfirmButton.getPosition());
 
+	m_broadcastPubliclyText.setString("Do you wish broadcast publicly?");
+	m_broadcastPubliclyText.setFont(m_font);
+	m_broadcastPubliclyText.setCharacterSize(30);
+	m_broadcastPubliclyText.setOrigin(sf::Vector2f(m_broadcastPubliclyText.getLocalBounds().width / 2, m_broadcastPubliclyText.getLocalBounds().height / 2));
+	m_broadcastPubliclyText.setPosition(sf::Vector2f(300.0f, 50.0f));
+
 	m_gameStartText.setString("Game Is About To Start");
 	m_gameStartText.setFont(m_font);
 	m_gameStartText.setCharacterSize(30);
 	m_gameStartText.setOrigin(sf::Vector2f(m_gameStartText.getLocalBounds().width / 2, m_gameStartText.getLocalBounds().height / 2));
-	m_gameStartText.setPosition(sf::Vector2f(250.0f, 25.0f));
+	m_gameStartText.setPosition(sf::Vector2f(300.0f, 50.0f));
 
 	m_gameOverText.setString("Game Over");
 	m_gameOverText.setFont(m_font);
 	m_gameOverText.setCharacterSize(30);
 	m_gameOverText.setOrigin(sf::Vector2f(m_gameOverText.getLocalBounds().width / 2, m_gameOverText.getLocalBounds().height / 2));
-	m_gameOverText.setPosition(sf::Vector2f(250.0f, 25.0f));
+	m_gameOverText.setPosition(sf::Vector2f(300.0f, 50.0f));
 
 	m_waitText.setString("Waiting For More Players...");
 	m_waitText.setFont(m_font);
 	m_waitText.setCharacterSize(30);
 	m_waitText.setOrigin(sf::Vector2f(m_waitText.getLocalBounds().width / 2, m_waitText.getLocalBounds().height / 2));
-	m_waitText.setPosition(sf::Vector2f(250.0f, 125.0f));
+	m_waitText.setPosition(sf::Vector2f(300.0f, 125.0f));
 
 	m_serverClosedText.setString("Server has shut down...");
 	m_serverClosedText.setFont(m_font);
 	m_serverClosedText.setCharacterSize(30);
 	m_serverClosedText.setOrigin(sf::Vector2f(m_serverClosedText.getLocalBounds().width / 2, m_serverClosedText.getLocalBounds().height / 2));
-	m_serverClosedText.setPosition(sf::Vector2f(250.0f, 125.0f));
+	m_serverClosedText.setPosition(sf::Vector2f(300.0f, 125.0f));
 
 	m_ipHelpText.setString("Enter the ip of the host:");
 	m_ipHelpText.setFont(m_font);
 	m_ipHelpText.setCharacterSize(30);
 	m_ipHelpText.setOrigin(sf::Vector2f(m_ipHelpText.getLocalBounds().width / 2, m_ipHelpText.getLocalBounds().height / 2));
-	m_ipHelpText.setPosition(sf::Vector2f(250.0f, 100.0f));
+	m_ipHelpText.setPosition(sf::Vector2f(300.0f, 100.0f));
 
 	m_ipValueText.setString(m_ipInputString);
 	m_ipValueText.setFont(m_font);
 	m_ipValueText.setCharacterSize(30);
 	m_ipValueText.setOrigin(sf::Vector2f(m_ipValueText.getLocalBounds().width / 2, m_ipValueText.getLocalBounds().height / 2));
-	m_ipValueText.setPosition(sf::Vector2f(250.0f, 150.0f));
+	m_ipValueText.setPosition(sf::Vector2f(300.0f, 150.0f));
 
 	m_endText.setFont(m_font);
 	m_endText.setCharacterSize(25);
@@ -518,19 +578,19 @@ void Game::setupUI()
 void Game::centreText()
 {
 	m_endText.setOrigin(sf::Vector2f(m_endText.getLocalBounds().width / 2, m_endText.getLocalBounds().height / 2));
-	m_endText.setPosition(sf::Vector2f(250.0f, 75.0f));
+	m_endText.setPosition(sf::Vector2f(300.0f, 100.0f));
 
 	m_gameOverText.setOrigin(sf::Vector2f(m_gameOverText.getLocalBounds().width / 2, m_gameOverText.getLocalBounds().height / 2));
-	m_gameOverText.setPosition(sf::Vector2f(250.0f, 25.0f));
+	m_gameOverText.setPosition(sf::Vector2f(300.0f, 50.0f));
 
 	m_gameStartText.setOrigin(sf::Vector2f(m_gameStartText.getLocalBounds().width / 2, m_gameStartText.getLocalBounds().height / 2));
-	m_gameStartText.setPosition(sf::Vector2f(250.0f, 25.0f));
+	m_gameStartText.setPosition(sf::Vector2f(300.0f, 50.0f));
 
 	m_startText.setOrigin(sf::Vector2f(m_startText.getLocalBounds().width / 2, m_startText.getLocalBounds().height / 2));
-	m_startText.setPosition(sf::Vector2f(250.0f, 75.0f));
+	m_startText.setPosition(sf::Vector2f(300.0f, 100.0f));
 
 	m_timeLastedText.setOrigin(sf::Vector2f(m_timeLastedText.getLocalBounds().width / 2, m_timeLastedText.getLocalBounds().height / 2));
-	m_timeLastedText.setPosition(sf::Vector2f(250.0f, 125.0f));
+	m_timeLastedText.setPosition(sf::Vector2f(300.0f, 150.0f));
 
 	m_centreText = false;
 }

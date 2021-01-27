@@ -22,6 +22,9 @@ public:
 	void render(sf::RenderWindow& t_window);
 
 	static float s_radius;
+	static float s_speed;
+	static float s_worldWidth;
+	static float s_worldHeight;
 
 private:
 

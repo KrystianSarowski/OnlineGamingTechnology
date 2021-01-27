@@ -1,6 +1,9 @@
 #include "Player.h"
 
 float Player::s_radius = 25.0f;
+float Player::s_radius = 2.0f;
+float Player::s_worldWidth = 600.0f;
+float Player::s_worldHeight = 600.0f;
 
 Player::Player():
 	m_startPosition(sf::Vector2f(0.0f,0.0f)),
@@ -40,6 +43,7 @@ sf::Vector2f Player::move()
 	}
 
 	moveVector = VectorMath::unit(moveVector);
+	moveVector = VectorMath::applyScaler(moveVector, s_speed);
 
 	return moveVector;
 }
@@ -90,20 +94,20 @@ void Player::checkBoundry()
 {
 	if (m_position.x + s_radius < 0)
 	{
-		m_position.x = 500 + s_radius;
+		m_position.x = s_worldWidth + s_radius;
 	}
 
-	else if (m_position.x - s_radius > 500)
+	else if (m_position.x - s_radius > s_worldWidth)
 	{
 		m_position.x = 0 - s_radius;
 	}
 
 	if (m_position.y + s_radius < 0)
 	{
-		m_position.y = 500 + s_radius;
+		m_position.y = s_worldWidth + s_radius;
 	}
 
-	else if (m_position.y - s_radius > 500)
+	else if (m_position.y - s_radius > s_worldWidth)
 	{
 		m_position.y = 0 - s_radius;
 	}

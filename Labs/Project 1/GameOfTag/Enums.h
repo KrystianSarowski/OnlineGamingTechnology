@@ -12,6 +12,7 @@ enum class PacketType
 enum class GameState
 {
 	SELECT,
+	SELECTBROADCAST,
 	SELECTIP,
 	WAITING,
 	START,
