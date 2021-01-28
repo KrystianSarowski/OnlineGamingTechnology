@@ -1,7 +1,7 @@
 #include "Player.h"
 
 float Player::s_radius = 25.0f;
-float Player::s_radius = 2.0f;
+float Player::s_speed = 2.0f;
 float Player::s_worldWidth = 600.0f;
 float Player::s_worldHeight = 600.0f;
 

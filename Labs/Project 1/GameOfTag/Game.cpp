@@ -378,7 +378,7 @@ void Game::processEvents()
 
 void Game::render()
 {
-	m_window.clear();
+	m_window.clear(sf::Color(40, 40, 40));
 
 	switch (m_state)
 	{
