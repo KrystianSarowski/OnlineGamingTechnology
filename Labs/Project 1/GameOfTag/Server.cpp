@@ -99,18 +99,7 @@ bool Server::listenForNewConnection()
 
 bool Server::processPacket(std::shared_ptr<Connection> t_connection, PacketType t_packetType)
 {
-	switch (t_packetType)
-	{
-	case PacketType::PLAYERSET:
-	{
-		StartData data;
-		if (!getGameStart(t_connection, data))
-		{
-			return false;
-		}
-		break;
-	}
-	case PacketType::PLAYERUPDATE:
+	if (t_packetType == PacketType::PLAYERUPDATE)
 	{
 		PlayerData data;
 		if (!getPlayerUpdate(t_connection, data))
@@ -118,14 +107,14 @@ bool Server::processPacket(std::shared_ptr<Connection> t_connection, PacketType 
 			return false;
 		}
 		m_game->updatePlayer(data);
-		break;
 	}
-	default:
+	else
 	{
 		std::cout << "Unrecognized packet: " << (std::int32_t)t_packetType << std::endl;
 		return false;
 	}
-	}
+
+	return true;
 }
 
 void Server::clientHandlerThread(Server& t_server, std::shared_ptr<Connection> t_connection)
@@ -257,20 +246,6 @@ bool Server::getPacketType(std::shared_ptr<Connection> t_connection, PacketType&
 	return true;
 }
 
-void Server::sendPlayerUpdate(PlayerData& t_updateData)
-{
-	PS::PlayerUpdate gameUpdate(t_updateData);
-	std::shared_ptr<Packet> updatePacket = std::make_shared<Packet>(gameUpdate.toPacket());
-	{
-		std::shared_lock<std::shared_mutex> lock(m_mutexConnectionManager);
-
-		for (auto connection : m_connections) //For each connection...
-		{
-			connection->m_packetManager.append(updatePacket);
-		}
-	}
-}
-
 bool Server::getPlayerUpdate(std::shared_ptr<Connection> t_connection, PlayerData& t_updateData)
 {
 	std::int32_t bufferlength;
@@ -295,23 +270,6 @@ void Server::sendGameStart(StartData& t_startData, int t_index)
 	std::shared_lock<std::shared_mutex> lock(m_mutexConnectionManager);
 
 	m_connections[t_index]->m_packetManager.append(startPacket);
-}
-
-bool Server::getGameStart(std::shared_ptr<Connection> t_connection, StartData& t_startData)
-{
-	std::int32_t bufferlength;
-
-	if (!getint32t(t_connection, bufferlength))
-	{
-		return false;
-	}
-
-	if (bufferlength == 0)
-	{
-		return true;
-	}
-
-	return recieveAll(t_connection, (char*)&t_startData, bufferlength);;
 }
 
 void Server::sendGameEnd(EndData& t_endData)
