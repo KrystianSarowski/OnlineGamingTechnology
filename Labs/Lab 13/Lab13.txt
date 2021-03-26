@@ -1,0 +1,11 @@
+Q1 M_1 is encrypted using the key E_K.
+
+E_K is made using PR(A)(PU(B)).
+
+The message M_1 is then encrypted such that it equals E_K(M_1).
+
+Q2 M_3 is decrypted using the key D_K.
+
+D_K is made using PR(B)(PU(A)).
+
+The message M_3 is then encrypted such that it equals D_K(M_3).
