@@ -9,3 +9,9 @@ Q2 M_3 is decrypted using the key D_K.
 D_K is made using PR(B)(PU(A)).
 
 The message M_3 is then encrypted such that it equals D_K(M_3).
+
+Q3 In order to avoid someone altering the message in an undetectable manner Alice can encrypt the message 
+to bob using the formula E = M_2^e MOD N using her private key and bob's public key to obtain the values.
+
+Q3 Bob can then decipher the message using similar approch to decipher using his private key and Alice's public key.
+If the message is from Alice it can be easily deciphered into coherent text otherwise it is not from her.
